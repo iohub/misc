@@ -12,6 +12,7 @@ baseurl = 'https://cn.bing.com/dict/search?q=%s&qs=n&form=Z9LH5&sp=-1&lq=0&pq=%s
 def crawl_corpus(driver, keywords, savefile):
     max_page, max_retry = 20, 3
     savefile = open(savefile, 'w', encoding='utf8')
+    total, success, error = 0, 0, 0
     for kw in keywords:
         logging.info('crawl by keyword:%s' % kw)
         url = baseurl % (kw, kw)
@@ -27,19 +28,24 @@ def crawl_corpus(driver, keywords, savefile):
             pageno += 1
             if pageno > max_page:
                 break
+            total += 1
             try:
                 div_id = 'sentenceSeg'
                 element = driver.find_element(By.ID, div_id)
                 text = element.text
-                print(text)
+                # print(text)
                 savefile.write(text + '\n')
-                next_page_classname = "//a[@class='sb_pagNsb_pagN_bp']"
+                next_page_classname = "//a[@class='sb_pagN sb_pagN_bp']"
                 driver.find_element(By.XPATH, next_page_classname).click()
-                time.sleep(1.5)
+                time.sleep(2)
+                success += 1
             except Exception as e:
-                logging.error('error: %s', str(e))
+                error += 1
+                logging.error('total:%d success:%d error:%d task for %s page:%d error: %s',
+                     total, success, error, kw, pageno, str(e))
 
     savefile.close()
+
 
 def load_keywords(filename):
     keywords = []
