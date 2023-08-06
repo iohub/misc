@@ -30,18 +30,19 @@ def crawl_corpus(driver, keywords, savefile):
                 break
             total += 1
             try:
-                for _ in range(max_retry):
+                for retry in range(max_retry):
                     div_id = 'sentenceSeg'
                     element = driver.find_element(By.ID, div_id)
                     text = element.text
                     if text == last_text:
                         next_page_classname = "//a[@class='sb_pagN sb_pagN_bp']"
-                        driver.find_element(By.XPATH, next_page_classname).click()
+                        if retry == 0: driver.find_element(By.XPATH, next_page_classname).click()
                         time.sleep(0.3)
                     else: 
                         savefile.write(text + '\n')
                         last_text = text
                         success += 1
+                        break
             except Exception as e:
                 error += 1
                 logging.error('total:%d success:%d error:%d task for %s page:%d error: %s',
