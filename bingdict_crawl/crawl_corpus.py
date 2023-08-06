@@ -23,22 +23,25 @@ def crawl_corpus(driver, keywords, savefile):
             continue
 
         pageno = 0
-        prev_page = ""
+        last_text = ""
         while True:
             pageno += 1
             if pageno > max_page:
                 break
             total += 1
             try:
-                div_id = 'sentenceSeg'
-                element = driver.find_element(By.ID, div_id)
-                text = element.text
-                # print(text)
-                savefile.write(text + '\n')
-                next_page_classname = "//a[@class='sb_pagN sb_pagN_bp']"
-                driver.find_element(By.XPATH, next_page_classname).click()
-                time.sleep(2)
-                success += 1
+                for _ in range(max_retry):
+                    div_id = 'sentenceSeg'
+                    element = driver.find_element(By.ID, div_id)
+                    text = element.text
+                    if text == last_text:
+                        next_page_classname = "//a[@class='sb_pagN sb_pagN_bp']"
+                        driver.find_element(By.XPATH, next_page_classname).click()
+                        time.sleep(0.3)
+                    else: 
+                        savefile.write(text + '\n')
+                        last_text = text
+                        success += 1
             except Exception as e:
                 error += 1
                 logging.error('total:%d success:%d error:%d task for %s page:%d error: %s',
